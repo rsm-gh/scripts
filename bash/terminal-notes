@@ -1,0 +1,228 @@
+#!/bin/bash
+
+#  Copyright (C) 2014-2015  Rafael Senties Martinelli
+#
+#  This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License 3 as published by
+#   the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
+
+#################################
+# Variables to fill by the user #
+                                #
+USER=                           # This is only in order to create a backup of your notes. 
+BACKUP_FOLDER=                  # This is only in order to create a backup of your notes (you must enter a path).
+terminal_editor=nano            # Chose the terminal editor that you want to use to modify the file
+maximize_at_startup=true        # wmctrl dependence. Use (true/false)
+unmaximize_at_quit=true         # wmctrl dependence. Use (true/false)
+                                #
+#################################
+
+SCRIPTNAME=`basename $0`
+FILE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Fonts
+BLACK="\e[00;30m"
+BLUE="\e[00;34m"
+GREEN="\e[00;32m"
+CYAN="\e[00;36m"
+RED="\e[00;31m"
+PURPLE="\e[00;35m"
+ORANGE="\e[00;33m"
+YELLOW="\e[01;33m"
+WHITE="\e[01;37m"
+DISABLE="\e[00m"
+
+# Changing Fonts + Backgrounds
+BLACK_AND_PURPLE="\e[45;30m"
+WHITE_AND_CYAN="\e[45;46m"
+
+##########################################################################
+##    T E X T: Modify the variables NORMAL_NOTES & OLD_NOTES          ####
+##########################################################################
+NORMAL_NOTES="
+$ORANGE [-- Terminal Notes --] $DISABLE
+
+
+ As you can see with this program you can easily display notes in the terminal.
+ 
+ You only need to respect the \"Bash Printing Rules\" because your whole note
+ have to be a bash string.
+ 
+ 
+ Some Examples:
+    You can print quotes by escaping them:   \\\"
+    $CYAN You can change the color of text..$BLACK_AND_PURPLE Or its background.. $DISABLE
+    
+
+ For more info search on the web for \"bash printing rules\". 
+ 
+ As an example I let you some of my old notes from when I started using GNU-Linux.
+ You can see them in by pressing \"o\"
+" #END_OF_NOTES - DO NOT MODIFY THIS COMMENT
+#
+# START OF THE OLD NOTES
+#
+OLD_NOTES="
+
+    $ORANGE [-- Unix Commands --] $DISABLE
+
+ shutdown -h +5                         shutdown in 5 min
+ pstree                             Show the Process on a tree
+ dpkg -i /path~.deb                     Install Debian Packages
+ rm -rf /path~                          Delete  folders and sub-folders 
+ mv /path~ /to path~                        Move Files/Folders
+ chown USER -R /Path~                       Make the User OWN the folder and files inside
+ ls -la /path~                          Show files on the Path
+
+
+        $ORANGE [-- Program Commands--] $DISABLE
+
+ gphoto2 --port=usb: -R -p 40-50                Transfer Camera Roll files. Range from 40 to 50 (exemple)
+ gphoto2 --port=usb: -R -P                  Transfer All files from Camera Roll to the current folder.
+
+ wodim --devices                        Show Devices
+ wodim -v -dev='DEVICE_NAME' /path.iso~             Burn Iso
+ wodim -v -dev='/dev/sg1' /path.iso~                Burn Iso ( copy/paste command )
+
+" #END_OF_OLD_NOTES - DO NOT MODIFY THIS COMMENT
+
+##########################################################################
+#########             DO NOT MODIFY THIS           #######################
+##########################################################################
+
+if [ -z "$1" ]; then
+    if [ $maximize_at_startup == true ]; then
+        wmctrl -r :ACTIVE: -b toggle,maximized_vert,maximized_horz
+    fi
+    sleep 0.3s
+    Title="$BLACK_AND_PURPLE Options: (m)odify,(b)ackup,(o)ld notes,(e)xit.                                             Terminal NORMAL_NOTES v1.2~0 $DISABLE"
+    echo -e "$Title
+$NORMAL_NOTES
+$Title"
+    read -n 1 CHOICE
+    case $CHOICE in
+        o|O)
+            Header="$WHITE_AND_CYAN                                                                         Old NORMAL_NOTES     $DISABLE" 
+            Footer="$WHITE_AND_CYAN                                                                         Old NORMAL_NOTES     $DISABLE"
+            echo -e "
+$Header
+$OLD_NOTES
+$Footer"
+    ;;
+        m|M)
+            if [ -w "$FILE_PATH/$SCRIPTNAME" ]; then
+                $terminal_editor "$FILE_PATH/$SCRIPTNAME"
+            else
+                echo "You don't have write permission on the file"
+            fi
+            if [ $unmaximize_at_quit == true ]; then
+                wmctrl -r :ACTIVE: -b remove,maximized_vert
+                wmctrl -r :ACTIVE: -b remove,maximized_horz
+            fi
+    ;;
+        e|E)
+            if [ $unmaximize_at_quit == true ]; then
+                wmctrl -r :ACTIVE: -b remove,maximized_vert
+                wmctrl -r :ACTIVE: -b remove,maximized_horz
+        fi
+    ;;
+    esac
+else
+    case "$1" in
+        -m|--modify)
+            if [ -w "$FILE_PATH/$SCRIPTNAME" ]; then
+                $terminal_editor "$FILE_PATH/$SCRIPTNAME"
+            else
+                echo "You don't have write permission on the file"
+            fi
+            if [ $unmaximize_at_quit == true ]; then
+                wmctrl -r :ACTIVE: -b remove,maximized_vert
+                wmctrl -r :ACTIVE: -b remove,maximized_horz
+            fi
+    ;;
+        b|--backup)
+            cp "$FILE_PATH/$SCRIPTNAME" "$BACKUP_FOLDER/v1.2~0-$SCRIPTNAME"
+            if [ -w "$FILE_PATH/$SCRIPTNAME" ]; then
+                chown "$USER" "$BACKUP_FOLDER/v1.2~0-$SCRIPTNAME"
+            else
+                echo "You didn't have write permission on the file, so you wont be able to modify the backup."
+            fi
+            if [ $unmaximize_at_quit == true ]; then
+                wmctrl -r :ACTIVE: -b remove,maximized_vert
+                wmctrl -r :ACTIVE: -b remove,maximized_horz
+            fi
+    ;;
+        -f|--formating)
+            echo -e "
+            
+    To use the commands just use $<command> on your text.
+    
+        Ex: \$RED hello \$DISABLE ---prints--> $RED hello $DISABLE
+    
+    Font Colors:    
+ $BLACK BLACK $BLUE BLUE $GREEN GREEN $CYAN CYAN $RED RED $PURPLE PURPLE $ORANGE ORANGE $YELLOW YELLOW $WHITE WHITE $DISABLE
+    
+    Font and Background
+    
+ $BLACK_AND_PURPLE BLACK_AND_PURPLE WHITE_AND_CYAN $WHITE_AND_CYAN $DISABLE
+            
+            "
+    ;;
+        -h|--help)
+            echo "
+ Usage:
+    terminal-notes [OPTION]
+
+ Options:
+    
+    -f, --formating Display some formating rules and shortcuts
+    -m, --modify    Modify the notes.
+    -b, --backup    Create a backup of the notes. 
+
+    -h, --help  Display this dialog.
+    -v, --version   Display the current version.
+    -l, --license   Display the license.
+"
+    ;;
+        -l|--license)
+            echo "
+  Copyright (C) 2014-2015  Rafael Senties Martinelli
+
+  This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License 3 as published by
+   the Free Software Foundation.
+
+  This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
+"   
+    ;;
+        -v|--version)
+            echo "1.2~1"
+    esac
+fi
+
+
+
+
+
+
+
+
+
+
+

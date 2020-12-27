@@ -1,0 +1,44 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+#
+
+#  Copyright (C) 2014  Rafael Senties Martinelli
+#
+#  This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License 3 as published by
+#   the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+
+# this script mus be placed at /usr/bin/ and called by /etc/rc.local
+#
+# It executes commands as root once an user has logged in
+#
+
+import os, time
+
+Buffer_list=[]
+while True:
+	users=os.popen('''who | cut -d' ' -f1 | sort | uniq''')
+	users=users.read()
+	Current_List=users.split('\n')
+	Current_List=filter(None,Current_List)
+	if Current_List:
+		if Current_List != Buffer_list:
+			
+			if len(Current_List) > len(Buffer_list):
+				os.system('''/usr/bin/kbl off''')
+				os.system('''/usr/bin/xdotool key XF86MonBrightnessDown''')
+				os.system('''/usr/bin/xdotool key XF86MonBrightnessDown''')
+
+			Buffer_list=Current_List
+
+	time.sleep(0.5)
+

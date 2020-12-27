@@ -1,0 +1,114 @@
+#!/usr/bin/python3
+
+#  Copyright (C) 2016  Rafael Senties Martinelli
+#
+#  This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License 3 as published by
+#   the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
+
+"""
+    Script to have an aproximation of the number of active code lines
+"""
+
+
+import os
+
+directories=(   '/web/django/',
+                '/web/templates/',
+                '/web/static/',
+                '/web/media_public/software/',
+                '/web/media_public/scripts/',
+)
+
+
+def count_lines(path, line_comment=None, lines_comment_start=None, lines_comment_end=None):
+
+    with open(path, mode='rt', encoding='utf-8') as f:
+        lines=f.readlines()
+
+    
+    count=0
+    lines_comment_count=0
+    
+    for line in lines:
+        line=line.strip()
+        
+        if lines_comment_start is not None and lines_comment_start in line:
+            lines_comment_count+=1
+        
+        elif lines_comment_end is not None and lines_comment_end in line:
+            lines_comment_count+=1
+        
+        elif lines_comment_count <= 0 and (line_comment is None or not line.startswith(line_comment)):
+
+            if line_comment is not None and line_comment in line:
+                line=line.split(line_comment,1)[0]
+                
+            if len(line) >= 5:
+                count+=1
+            
+    return count
+
+
+def count_file_lines(path):
+    with open(path, mode='rt', encoding='utf-8') as f:
+        lines=f.readlines()
+        
+    _count=0
+    for line in lines:
+        line=line.strip()
+        if len(line) >= 5:
+            _count+=1
+            
+    return _count
+
+
+stats=[]
+count=0
+
+for directory in directories:
+    add=0
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            
+            abs_path='/'.join((root, file))
+            
+            if abs_path.endswith('.py') and not abs_path.endswith('.pyc') and not '__migrations__' in abs_path:
+                add+=count_lines(abs_path, '#', '"""', '"""')
+                
+            elif abs_path.endswith('.js'):
+                add+=count_lines(abs_path,'//', '/*', '*/')
+                
+            elif abs_path.endswith('.html'):
+                add+=count_lines(abs_path, None, '<!--', '-->')
+                
+            elif abs_path.endswith('.css'):
+                add+=count_lines(abs_path, None, '/*', '*/')
+
+
+    stats.append([directory, add, 0])
+    count+=add
+
+
+
+for item in stats:
+    item[2]=int(item[1]/count*100)
+
+
+print('\nFls\t Lns\t Dir\n')
+
+for item in stats:
+    print(item[2], '\t', item[1], '\t', item[0])
+
+print('\nTotal: ',count)
+
+

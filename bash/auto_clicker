@@ -1,0 +1,55 @@
+#!/bin/bash
+
+#  Copyright (C) 2014  Rafael Senties Martinelli
+#
+#  This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License 3 as published by
+#   the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
+
+
+#   VERSION=6
+#   DATE=26.01.2014
+#   SCRIPTNAME=auto_clicker
+#   Dependeces: xdotool, wmctrl
+#   Description: Auto Mouse clicker, set the number of mouse clicks and press enter.
+#   To Configure: YOU HAVE TO REPLACE the title of your terminal at the end of the script. ( run the script and see it's title )
+#                 If you have multiple 'titles' just add them as i did. LINE 51+
+
+                                                                            # To Do: block the dimensions of the terminal
+wmctrl -r :ACTIVE: -T "Auto Clicker" ## Change the window name [SpUsr]      # To Do: change window name with out super user
+wmctrl -r :ACTIVE: -e 0,50,300,250,100 ## Resize the window {0 . y_W_position . x_W_position . y_W _ize . x_W_size}
+wmctrl -r :ACTIVE: -b add,above  ## set the window on top
+
+while true; do
+    printf "\033c"
+    CLICKS=0;DONE=0
+    echo -e "\e[00;33m   ~ Auto Mouse Clicker ~ \e[00m"
+    echo -e ""
+    read -p " Enter the clicks number
+  and press enter: " CLICKS
+        while [ $DONE -lt $CLICKS ]; do
+            sleep 0.1   # Clicks/Second
+            xdotool click 1
+            DONE=$[$DONE +1]
+            printf "\033c"
+            echo -e "\e[00;33m   ~ Auto Mouse Clicker ~ \e[00m
+            
+      Runing!
+     $DONE of $CLICKS Clicks"
+        done
+
+# Replace with the "Title" of your terminal while runing the script.        
+wmctrl -a "/bin/bash" # Activate the window
+wmctrl -a "rsm@system-protection: /usr/bash" # Activate the window
+wmctrl -a "rsm@system-protection: ~" # Activate the window
+done
+

@@ -1,0 +1,59 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+#
+
+#  Copyright (C) 2014  Rafael Senties Martinelli
+#
+#  This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License 3 as published by
+#   the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
+
+#
+# It converts all the files in the working directory.
+#
+delete=True # True/False  Delete the original files
+#
+# mp4, avi to ogg. (removing the extensions), depends on: ffmpeg2theora
+# epub, chm to pdf. depends on: calibre, chm2pdf 
+#
+
+import os
+import sys
+import time
+
+__version__ = '1.0'
+
+files = [f for f in os.listdir('.') if os.path.isfile(f)]
+for file in files:
+	if file[-3:].lower() in ("mp4","avi"):
+		os.system('''ffmpeg2theora -v 8 --nometadata "{0}" '''.format(file))
+		if os.path.exists(file[:-3]+"ogv"):
+			os.remove(file)
+			os.rename(file[:-3]+"ogv",file[:-4])
+	
+	elif file[-4:].lower()=="epub":
+		os.system('''ebook-convert "{0}" "{1}"  --enable-heuristics'''.format(file,file[:-4]+"pdf"))
+		if os.path.exists(file[:-4]+"pdf"):
+			os.remove(file)
+			os.rename(file[:-4]+"pdf",file[:-5])
+		
+	elif file[-4:].lower()=="chm":
+		os.system('''chm2pdf --webpage "{0}" '''.format(os.getcwd()+"/"+file))
+		if os.path.exists(file[:-4]+"chm"):
+			os.remove(file)
+			os.rename(file[:-4]+"pdf",file[:-4])
+
+
+if not os.path.exists("/usr/share/sounds/purple/receive.wav"):
+	os.system('''aplay /usr/share/sounds/purple/receive.wav; clear''')
+	
+print "The convertion has finished"	

@@ -1,0 +1,82 @@
+#!/usr/bin/python2.7
+# -*- coding: utf-8 -*-
+#
+
+#  Copyright (C) 2015  Rafael Senties Martinelli
+#
+#  This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License 3 as published by
+#   the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software Foundation,
+#   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
+
+"""
+    This code generates chunked zips from a large folders.
+    
+    Use absolute paths for the FOLDER & EXTRACTION paths.
+    
+"""
+
+__version__ = '1.0'
+
+FOLDER_PATH='/home/rsm/Desktop/photorec_filtred/'
+EXTRACTION_PATH='/home/rsm/Desktop/photorec'
+ZIP_SIZE=450 # Size in MB
+
+
+
+
+import os, zipfile
+
+def get_size(path):
+    return os.path.getsize(path)/(1000000.0)
+
+
+if not os.path.exists(FOLDER_PATH):
+    print "The folder path doesn't exists"
+elif not os.path.isdir(FOLDER_PATH):
+    print "The folder path is not a directory."
+else:
+    #
+    # Fix the FOLDER_PATH & EXTRACTION_PATH
+    #
+    if not FOLDER_PATH.endswith('/'):
+        FOLDER_PATH+='/'
+    
+    if EXTRACTION_PATH.endswith('/'):
+        EXTRACTION_PATH=EXTRACTION_PATH[:-1]
+    
+    #
+    # Do the work!
+    #
+    base_name=os.path.basename(EXTRACTION_PATH)
+    
+    paths=[]
+    for root, dirs, files in os.walk(FOLDER_PATH):
+        for file in files:
+            paths.append(os.path.join(root, file))
+    
+    paths.sort()
+    paths=iter(paths)
+    
+    
+    for number, path in enumerate(paths):
+        zip_base_dir='/{0}({1}).zip'.format(base_name, number+1)
+        chunk_size=0
+        base_dir='/{0}({1})/'.format(base_name, number+1)
+        zipf = zipfile.ZipFile('{0}({1}).zip'.format(EXTRACTION_PATH, number+1), 'w')
+        chunk_size+=get_size(path)
+        zipf.write(path, path.replace(FOLDER_PATH, base_dir))
+        for path2 in paths:
+            zipf.write(path2, path2.replace(FOLDER_PATH, base_dir))
+            chunk_size+=get_size(path2)
+            if chunk_size > ZIP_SIZE:
+                break
+        zipf.close()
